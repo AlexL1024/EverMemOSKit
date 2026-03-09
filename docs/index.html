@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>EverMemOSKit</title>
+  <style>
+    :root {
+      --bg: #f5f1e8;
+      --panel: rgba(255, 251, 243, 0.88);
+      --ink: #1c1a18;
+      --muted: #5e554b;
+      --accent: #0d6b5c;
+      --accent-2: #bf4f28;
+      --line: rgba(28, 26, 24, 0.12);
+      --shadow: 0 20px 60px rgba(40, 26, 12, 0.12);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Georgia, "Iowan Old Style", serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(13, 107, 92, 0.16), transparent 32%),
+        radial-gradient(circle at bottom right, rgba(191, 79, 40, 0.16), transparent 30%),
+        linear-gradient(180deg, #f8f4ec 0%, var(--bg) 100%);
+    }
+
+    main {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 48px 20px 64px;
+    }
+
+    .hero, .section {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(8px);
+    }
+
+    .hero {
+      padding: 40px 28px;
+      margin-bottom: 24px;
+    }
+
+    .eyebrow {
+      margin: 0 0 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      font-size: 12px;
+      color: var(--accent);
+    }
+
+    h1, h2 {
+      margin: 0 0 14px;
+      line-height: 1.05;
+      font-weight: 700;
+    }
+
+    h1 { font-size: clamp(40px, 8vw, 76px); }
+    h2 { font-size: clamp(28px, 4vw, 38px); }
+
+    p {
+      margin: 0 0 14px;
+      line-height: 1.6;
+      color: var(--muted);
+      font-size: 18px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+      margin-top: 24px;
+    }
+
+    .card {
+      padding: 18px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.65);
+      border: 1px solid var(--line);
+    }
+
+    .section {
+      padding: 28px;
+      margin-top: 20px;
+    }
+
+    ul, ol {
+      margin: 12px 0 0 24px;
+      color: var(--muted);
+      line-height: 1.7;
+      font-size: 17px;
+    }
+
+    a {
+      color: var(--accent);
+      text-decoration-thickness: 2px;
+      text-underline-offset: 2px;
+    }
+
+    .cta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 22px;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 12px 18px;
+      border-radius: 999px;
+      text-decoration: none;
+      font-weight: 700;
+      border: 1px solid transparent;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fffaf2;
+    }
+
+    .btn-secondary {
+      border-color: var(--line);
+      color: var(--ink);
+      background: transparent;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="hero">
+      <p class="eyebrow">Memory Genesis Competition 2026</p>
+      <h1>EverMemOSKit</h1>
+      <p>EverMemOSKit is a standalone Swift SDK for integrating EverMemOS memory workflows into iOS and macOS apps.</p>
+      <div class="grid">
+        <div class="card">
+          <strong>Built for Swift</strong>
+          <p>Typed models, async/await APIs, Swift Package Manager distribution.</p>
+        </div>
+        <div class="card">
+          <strong>Memory-native</strong>
+          <p>Write, fetch, search, redact, and stream memory-aware chat in one SDK.</p>
+        </div>
+        <div class="card">
+          <strong>Production-minded</strong>
+          <p>Auth abstraction, retries, SSE support, and automated tests.</p>
+        </div>
+      </div>
+      <div class="cta-row">
+        <a class="btn btn-primary" href="../README.md">Read README</a>
+        <a class="btn btn-secondary" href="./demo-video.md">Video Placeholder</a>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>How Memory Is Used</h2>
+      <p>The SDK exposes EverMemOS memory operations directly to app developers. Apps can store important user facts and interactions, retrieve structured memories later, and use those results to produce memory-aware chat or behavior.</p>
+      <ol>
+        <li>An app writes a memory with <code>memorize</code>.</li>
+        <li>The app later fetches or searches memory using typed builders.</li>
+        <li>The app uses that memory to answer, recommend, or continue context for the user.</li>
+      </ol>
+    </section>
+
+    <section class="section">
+      <h2>How This Helps Users</h2>
+      <ul>
+        <li>Users do not need to repeat important context every session.</li>
+        <li>Apps can recover prior interactions and preferences with better continuity.</li>
+        <li>Developers can build memory-aware experiences without hand-writing the API layer.</li>
+      </ul>
+    </section>
+
+    <section class="section">
+      <h2>Submission Notes</h2>
+      <p>This docs page is intended for GitHub Pages deployment. Before final submission, replace the video placeholder with the final English demo link and point the repository URL to the public GitHub repository.</p>
+    </section>
+  </main>
+</body>
+</html>
+
