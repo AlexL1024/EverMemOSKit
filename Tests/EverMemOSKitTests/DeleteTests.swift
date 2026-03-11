@@ -2,7 +2,7 @@ import Testing
 import Foundation
 @testable import EverMemOSKit
 
-@Suite("DELETE /api/v1/memories")
+@Suite("DELETE /api/{v}/memories")
 struct DeleteTests {
     @Test("Success — filters + count response")
     func testDeleteSuccess() async throws {
@@ -56,5 +56,14 @@ struct DeleteTests {
         let result = try await client.deleteMemories(req)
         #expect(result.filters.isEmpty)
         #expect(result.count == 0)
+    }
+
+    @Test("Validation — requires at least one filter")
+    func testDeleteRequiresFilter() async throws {
+        let tag = "delete-validation"
+        let (client, _) = TestHelper.makeClient(tag: tag)
+        await #expect(throws: EverMemOSError.self) {
+            try await client.deleteMemories(DeleteMemoriesRequest())
+        }
     }
 }

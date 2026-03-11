@@ -31,17 +31,19 @@ actor HTTPTransport {
             logger.debug("requestBaseAPI raw response (\(path)): \(raw.prefix(2000))")
         }
         let response = try decoder.decode(BaseAPIResponse<T>.self, from: data)
-        logger.info("requestBaseAPI (\(path)) status=\(response.status) message=\(response.message) hasResult=\(response.result != nil)")
-        // Fail only on explicit error status; HTTP 200 + any other status = success
-        if response.status == "error" || response.status == "fail" {
+        if config.logLevel.rawValue >= Configuration.LogLevel.info.rawValue {
+            logger.info("requestBaseAPI (\(path)) status=\(response.status) message=\(response.message) hasResult=\(response.result != nil)")
+        }
+        // Fail only on explicit error status; HTTP 200 + non-error status (e.g. "queued") = success
+        let status = response.status.lowercased()
+        if status == "error" || status == "fail" || status == "failed" {
             throw EverMemOSError.apiError(statusCode: 0, message: "[\(response.status)] \(response.message)")
         }
         if let result = response.result {
             return result
         }
-        // result is nil (e.g. async queued) — decode T with message as context
-        let fallback = try JSONSerialization.data(withJSONObject: ["message": response.message])
-        return try decoder.decode(T.self, from: fallback)
+        // result is nil (e.g. async queued) — decode default T from empty JSON
+        return try decoder.decode(T.self, from: Data("{}".utf8))
     }
 
     // MARK: - Pattern 2: SuccessResponse<T>
@@ -67,59 +69,6 @@ actor HTTPTransport {
         let data = try await performRequest(method: method, path: path, query: query, body: body)
         return try decoder.decode(T.self, from: data)
     }
-
-    // MARK: - SSE Streaming
-
-    nonisolated func streamSSE(
-        path: String,
-        body: (any Encodable & Sendable),
-        extraHeaders: [String: String] = [:]
-    ) -> AsyncThrowingStream<ChatSSEData, Error> {
-        let transport = self
-        return AsyncThrowingStream { continuation in
-            Task {
-                do {
-                    var request = try await transport.buildSSERequest(
-                        path: path, body: body
-                    )
-                    request.timeoutInterval = 120
-                    for (k, v) in extraHeaders {
-                        request.setValue(v, forHTTPHeaderField: k)
-                    }
-
-                    let session = await transport.getSession()
-                    let (bytes, response) = try await session.bytes(for: request)
-                    if let http = response as? HTTPURLResponse,
-                       !(200...299).contains(http.statusCode) {
-                        throw EverMemOSError.apiError(
-                            statusCode: http.statusCode, message: "SSE stream failed"
-                        )
-                    }
-
-                    for try await line in bytes.lines {
-                        if let event = SSEParser.parse(line: line) {
-                            continuation.yield(event)
-                            if event.eventType == .done || event.eventType == .error {
-                                break
-                            }
-                        }
-                    }
-                    continuation.finish()
-                } catch {
-                    continuation.finish(throwing: error)
-                }
-            }
-        }
-    }
-
-    func buildSSERequest(
-        path: String,
-        body: (any Encodable & Sendable)
-    ) async throws -> URLRequest {
-        try await buildRequest(method: "POST", path: path, query: nil, body: body)
-    }
-
-    func getSession() -> URLSession { session }
 
     // MARK: - Core Request
 
@@ -210,11 +159,13 @@ actor HTTPTransport {
 public enum EverMemOSError: LocalizedError, Sendable {
     case networkError(String)
     case apiError(statusCode: Int, message: String)
+    case invalidParameter(String)
 
     public var errorDescription: String? {
         switch self {
         case .networkError(let msg): return "Network error: \(msg)"
         case .apiError(let code, let msg): return "API error (\(code)): \(msg)"
+        case .invalidParameter(let msg): return "Invalid parameter: \(msg)"
         }
     }
 }

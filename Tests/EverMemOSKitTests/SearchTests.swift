@@ -2,7 +2,7 @@ import Testing
 import Foundation
 @testable import EverMemOSKit
 
-@Suite("GET /api/v1/memories/search")
+@Suite("GET /api/{v}/memories/search")
 struct SearchTests {
     @Test("Success — with scores and groups")
     func testSearchSuccess() async throws {
@@ -14,12 +14,10 @@ struct SearchTests {
                 "status": "ok", "message": "ok",
                 "result": [
                     "memories": [
-                        ["group_123": [
-                            ["memory_type": "episodic_memory", "summary": "Test"]
-                        ]]
+                        ["memory_type": "episodic_memory", "summary": "Test", "group_id": "group_123"]
                     ],
-                    "scores": [["group_123": [0.95]]],
-                    "importance_scores": [0.85],
+                    "profiles": [] as [Any],
+                    "scores": [0.95],
                     "original_data": [] as [Any],
                     "total_count": 1,
                     "has_more": false,
@@ -35,7 +33,7 @@ struct SearchTests {
         let result = try await client.searchMemories(builder)
         #expect(result.totalCount == 1)
         #expect(result.scores.count == 1)
-        #expect(result.importanceScores == [0.85])
+        #expect(result.scores == [0.95])
     }
 
     @Test("Failure — API error")
@@ -73,5 +71,6 @@ struct SearchTests {
         let result = try await client.searchMemories(builder)
         #expect(result.memories.isEmpty)
         #expect(result.pendingMessages.isEmpty)
+        #expect(result.scores.isEmpty)
     }
 }

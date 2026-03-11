@@ -5,9 +5,8 @@ import Foundation
 public struct SearchResponse: Decodable, Sendable {
     public let memories: [FlexibleMemory]
     public let profiles: [SearchProfile]
-    public let scores: [[String: [Double]]]
-    public let importanceScores: [Double]
-    public let originalData: [[String: [[String: AnyCodableValue]]]]
+    public let scores: [Double]
+    public let originalData: [AnyCodableValue]
     public let totalCount: Int
     public let hasMore: Bool
     public let queryMetadata: [String: AnyCodableValue]?
@@ -16,7 +15,6 @@ public struct SearchResponse: Decodable, Sendable {
 
     enum CodingKeys: String, CodingKey {
         case memories, scores, profiles
-        case importanceScores = "importance_scores"
         case originalData = "original_data"
         case totalCount = "total_count"
         case hasMore = "has_more"
@@ -29,15 +27,21 @@ public struct SearchResponse: Decodable, Sendable {
         let c = try decoder.container(keyedBy: CodingKeys.self)
         self.memories = try c.decodeIfPresent([FlexibleMemory].self, forKey: .memories) ?? []
         self.profiles = try c.decodeIfPresent([SearchProfile].self, forKey: .profiles) ?? []
-        self.scores = try c.decodeIfPresent([[String: [Double]]].self, forKey: .scores) ?? []
-        self.importanceScores = try c.decodeIfPresent([Double].self, forKey: .importanceScores) ?? []
-        self.originalData = try c.decodeIfPresent([[String: [[String: AnyCodableValue]]]].self, forKey: .originalData) ?? []
+        self.scores = try c.decodeIfPresent([Double].self, forKey: .scores) ?? []
+        self.originalData = try c.decodeIfPresent([AnyCodableValue].self, forKey: .originalData) ?? []
         self.totalCount = try c.decodeIfPresent(Int.self, forKey: .totalCount) ?? 0
         self.hasMore = try c.decodeIfPresent(Bool.self, forKey: .hasMore) ?? false
         self.queryMetadata = try c.decodeIfPresent([String: AnyCodableValue].self, forKey: .queryMetadata)
         self.metadata = try c.decodeIfPresent([String: AnyCodableValue].self, forKey: .metadata)
         self.pendingMessages = try c.decodeIfPresent([PendingMessage].self, forKey: .pendingMessages) ?? []
     }
+}
+
+// MARK: - Convenience
+
+public extension SearchResponse {
+    /// Direct access to the memories array (convenience alias).
+    var flatMemories: [FlexibleMemory] { memories }
 }
 
 // MARK: - PendingMessage

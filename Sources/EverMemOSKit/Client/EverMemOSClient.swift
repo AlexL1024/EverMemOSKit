@@ -4,27 +4,52 @@ import Foundation
 public actor EverMemOSClient {
     private let transport: HTTPTransport
     private let v: String
+    private let statusPath: String
 
     public init(config: Configuration) {
         self.transport = HTTPTransport(config: config)
         self.v = config.apiVersion
+        self.statusPath = config.statusPathSegment
+    }
+
+    /// Convenience: create a client with bearer token auth.
+    public init(
+        baseURL: URL,
+        token: String,
+        apiVersion: String = "v0",
+        timeoutInterval: TimeInterval = 30,
+        maxRetries: Int = 3,
+        retryDelay: TimeInterval = 1.0,
+        logLevel: Configuration.LogLevel = .error
+    ) {
+        let config = Configuration(
+            baseURL: baseURL,
+            auth: BearerTokenAuth(token: token),
+            apiVersion: apiVersion,
+            timeoutInterval: timeoutInterval,
+            maxRetries: maxRetries,
+            retryDelay: retryDelay,
+            logLevel: logLevel
+        )
+        self.transport = HTTPTransport(config: config)
+        self.v = config.apiVersion
+        self.statusPath = config.statusPathSegment
     }
 
     /// For testing: inject a custom URLSession.
     public init(config: Configuration, session: URLSession) {
         self.transport = HTTPTransport(config: config, session: session)
         self.v = config.apiVersion
+        self.statusPath = config.statusPathSegment
     }
 
-    // MARK: - 1. POST /api/{v}/memories
+    // MARK: - Memories
 
-    public func memorize(_ request: MemorizeRequest) async throws -> MemorizeResult {
-        try await transport.requestBaseAPI(
+    public func memorize(_ request: MemorizeRequest) async throws -> AddMemoriesResponse {
+        try await transport.requestBare(
             method: "POST", path: "api/\(v)/memories", body: request
         )
     }
-
-    // MARK: - 2. GET /api/{v}/memories (query params)
 
     public func fetchMemories(_ builder: FetchMemoriesBuilder) async throws -> FetchMemoriesResult {
         try await transport.requestBaseAPI(
@@ -32,72 +57,26 @@ public actor EverMemOSClient {
         )
     }
 
-    // MARK: - 3. GET /api/{v}/memories/search
-
     public func searchMemories(_ builder: SearchMemoriesBuilder) async throws -> SearchResponse {
         try await transport.requestBaseAPI(
             method: "GET", path: "api/\(v)/memories/search", query: builder.build()
         )
     }
 
-    // MARK: - 4. DELETE /api/{v}/memories
-
     public func deleteMemories(_ request: DeleteMemoriesRequest) async throws -> DeleteMemoriesResult {
-        try await transport.requestBaseAPI(
+        if request.memoryId == nil,
+           request.id == nil,
+           request.eventId == nil,
+           request.userId == nil,
+           request.groupId == nil {
+            throw EverMemOSError.invalidParameter("At least one filter must be provided for deleteMemories.")
+        }
+        return try await transport.requestBaseAPI(
             method: "DELETE", path: "api/\(v)/memories", body: request
         )
     }
 
-    // MARK: - 5. POST /api/{v}/chat/stream (SSE)
-
-    public func chatStream(
-        _ request: ChatStreamRequest,
-        deepSeekAPIKey: String? = nil
-    ) -> AsyncThrowingStream<ChatSSEData, Error> {
-        var headers: [String: String] = [:]
-        if let key = deepSeekAPIKey, !key.isEmpty {
-            headers["X-DeepSeek-API-Key"] = key
-        }
-        return transport.streamSSE(
-            path: "api/\(v)/chat/stream", body: request, extraHeaders: headers
-        )
-    }
-
-    // MARK: - 6. DELETE /api/{v}/chat/sessions/{id}
-
-    public func deleteSession(_ sessionId: String, deletedBy: String = "caregiver") async throws -> DeleteSessionResult {
-        try await transport.requestBare(
-            method: "DELETE",
-            path: "api/\(v)/chat/sessions/\(sessionId)",
-            query: ["deleted_by": deletedBy]
-        )
-    }
-
-    // MARK: - 7. DELETE /api/{v}/chat/turns/{id}
-
-    public func redactTurn(_ turnId: String) async throws -> RedactTurnResult {
-        try await transport.requestBare(
-            method: "DELETE", path: "api/\(v)/chat/turns/\(turnId)"
-        )
-    }
-
-    // MARK: - 8. GET /api/{v}/chat/sessions/{id}/export
-
-    public func exportSession(_ sessionId: String) async throws -> SessionExportResponse {
-        try await transport.requestBare(
-            method: "GET", path: "api/\(v)/chat/sessions/\(sessionId)/export"
-        )
-    }
-
-    // MARK: - 9. POST /api/{v}/chat/re-extract
-
-    public func reExtract(_ request: ReExtractRequest) async throws -> ReExtractResult {
-        try await transport.requestBare(
-            method: "POST", path: "api/\(v)/chat/re-extract", body: request
-        )
-    }
-
-    // MARK: - 10. POST /api/{v}/memories/conversation-meta
+    // MARK: - Conversation Meta
 
     public func createConversationMeta(
         _ request: ConversationMetaCreateRequest
@@ -106,8 +85,6 @@ public actor EverMemOSClient {
             method: "POST", path: "api/\(v)/memories/conversation-meta", body: request
         )
     }
-
-    // MARK: - 11. GET /api/{v}/memories/conversation-meta
 
     public func getConversationMeta(
         groupId: String? = nil
@@ -119,8 +96,6 @@ public actor EverMemOSClient {
         )
     }
 
-    // MARK: - 12. PATCH /api/{v}/memories/conversation-meta
-
     public func patchConversationMeta(
         _ request: ConversationMetaPatchRequest
     ) async throws -> PatchConversationMetaResult {
@@ -129,7 +104,7 @@ public actor EverMemOSClient {
         )
     }
 
-    // MARK: - 13. POST /api/{v}/global-user-profile/custom
+    // MARK: - Profile
 
     public func upsertCustomProfile(
         _ request: UpsertCustomProfileRequest
@@ -139,9 +114,30 @@ public actor EverMemOSClient {
         )
     }
 
-    // MARK: - 14. GET /health
+    // MARK: - Status & Health
+
+    public func getRequestStatus(
+        requestId: String
+    ) async throws -> SuccessResponse<RequestStatusData> {
+        try await transport.requestSuccess(
+            method: "GET",
+            path: "api/\(v)/\(statusPath)/request",
+            query: ["request_id": requestId]
+        )
+    }
 
     public func healthCheck() async throws -> HealthResponse {
         try await transport.requestBare(method: "GET", path: "health")
     }
+
+    /// Returns true if the server responds to /health with a healthy status.
+    public func isReachable() async -> Bool {
+        do {
+            let response = try await healthCheck()
+            return response.isHealthy
+        } catch {
+            return false
+        }
+    }
+
 }

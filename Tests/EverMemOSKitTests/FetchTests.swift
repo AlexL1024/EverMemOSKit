@@ -2,7 +2,7 @@ import Testing
 import Foundation
 @testable import EverMemOSKit
 
-@Suite("GET /api/v0/memories")
+@Suite("GET /api/{v}/memories")
 struct FetchTests {
     @Test("Success — fetch episodic memories")
     func testFetchSuccess() async throws {
@@ -14,11 +14,12 @@ struct FetchTests {
                 "status": "ok",
                 "message": "ok",
                 "result": [
+                    "count": 1,
                     "memories": [
                         ["memory_type": "episodic_memory", "summary": "Test memory"]
                     ],
-                    "total_count": 1,
-                    "count": 1,
+                    "metadata": [:] as [String: Any],
+                    "total_count": 1
                 ] as [String: Any],
             ])
             return (TestHelper.okResponse(url: request.url!), body)
@@ -28,6 +29,7 @@ struct FetchTests {
         builder.userId = "user_001"
         let result = try await client.fetchMemories(builder)
         #expect(result.totalCount == 1)
+        #expect(result.count == 1)
         #expect(result.memories.count == 1)
     }
 
@@ -53,7 +55,7 @@ struct FetchTests {
         MockURLProtocol.register(tag) { request in
             let body = TestHelper.jsonData([
                 "status": "ok", "message": "ok",
-                "result": ["total_count": 0, "count": 0] as [String: Any],
+                "result": ["total_count": 0] as [String: Any],
             ])
             return (TestHelper.okResponse(url: request.url!), body)
         }
@@ -63,5 +65,6 @@ struct FetchTests {
         let result = try await client.fetchMemories(builder)
         #expect(result.memories.isEmpty)
         #expect(result.totalCount == 0)
+        #expect(result.count == 0)
     }
 }

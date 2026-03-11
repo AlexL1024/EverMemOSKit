@@ -33,13 +33,3 @@ public enum MessageSenderRole: String, Codable, Sendable {
     case user
     case assistant
 }
-
-// MARK: - Chat SSE Event Types
-
-public enum ChatSSEEventType: String, Codable, Sendable {
-    case delta
-    case final_ = "final"
-    case evidence
-    case done
-    case error
-}

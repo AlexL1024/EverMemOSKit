@@ -54,11 +54,12 @@ public struct FlexibleMemory: Decodable, Sendable {
 
 public struct SearchMemoriesBuilder: Sendable {
     public var userId: String?
-    public var groupId: String?
+    public var groupIds: [String] = []
     public var query: String?
     public var memoryTypes: [MemoryType] = []
     public var retrieveMethod: RetrieveMethod = .keyword
-    public var topK: Int = 40
+    /// -1 means "no limit" per Evermind docs.
+    public var topK: Int = -1
     public var includeMetadata: Bool = true
     public var startTime: String?
     public var endTime: String?
@@ -74,10 +75,12 @@ public struct SearchMemoriesBuilder: Sendable {
             "include_metadata": String(includeMetadata),
         ]
         if let v = userId { params["user_id"] = v }
-        if let v = groupId { params["group_id"] = v }
+        if !groupIds.isEmpty {
+            params["group_ids"] = QueryEncoding.jsonArrayString(groupIds)
+        }
         if let v = query { params["query"] = v }
         if !memoryTypes.isEmpty {
-            params["memory_types"] = memoryTypes.map(\.rawValue).joined(separator: ",")
+            params["memory_types"] = QueryEncoding.jsonArrayString(memoryTypes.map(\.rawValue))
         }
         if let v = startTime { params["start_time"] = v }
         if let v = endTime { params["end_time"] = v }

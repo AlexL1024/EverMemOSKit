@@ -1,6 +1,6 @@
 import Foundation
 
-// MARK: - POST /api/v1/memories
+// MARK: - POST /api/{v}/memories (Add Memories)
 
 public struct MemorizeRequest: Encodable, Sendable {
     public let messageId: String
@@ -51,21 +51,16 @@ public struct MemorizeRequest: Encodable, Sendable {
     }
 }
 
-public struct MemorizeResult: Decodable, Sendable {
-    public let savedMemories: [AnyCodableValue]?
-    public let count: Int
-    public let statusInfo: String
+public struct AddMemoriesResponse: Decodable, Sendable {
+    public let status: String
+    public let message: String
+    public let requestId: String
 
     enum CodingKeys: String, CodingKey {
-        case savedMemories = "saved_memories"
-        case count
-        case statusInfo = "status_info"
-    }
-
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        self.savedMemories = try container.decodeIfPresent([AnyCodableValue].self, forKey: .savedMemories)
-        self.count = try container.decodeIfPresent(Int.self, forKey: .count) ?? 0
-        self.statusInfo = try container.decodeIfPresent(String.self, forKey: .statusInfo) ?? "accumulated"
+        case status
+        case message
+        case requestId = "request_id"
     }
 }
+
+public typealias MemorizeResponse = AddMemoriesResponse

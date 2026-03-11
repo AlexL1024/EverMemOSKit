@@ -16,6 +16,25 @@ enum TestHelper {
         return (client, session)
     }
 
+    /// Create a client configured for a specific deployment profile.
+    static func makeClient(tag: String, profile: DeploymentProfile) -> (EverMemOSClient, URLSession) {
+        let config = URLSessionConfiguration.ephemeral
+        config.protocolClasses = [MockURLProtocol.self]
+        let session = URLSession(configuration: config)
+        let auth: AuthProvider = profile.requiresAuth
+            ? BearerTokenAuth(token: "test-token")
+            : NoAuth()
+        let clientConfig = Configuration(
+            profile: profile,
+            baseURL: URL(string: "https://\(tag).test.example.com")!,
+            auth: auth,
+            maxRetries: 0,
+            logLevel: .none
+        )
+        let client = EverMemOSClient(config: clientConfig, session: session)
+        return (client, session)
+    }
+
     static func jsonData(_ dict: [String: Any]) -> Data {
         try! JSONSerialization.data(withJSONObject: dict)
     }
