@@ -52,9 +52,12 @@ public struct MemorizeRequest: Encodable, Sendable {
 }
 
 public struct AddMemoriesResponse: Decodable, Sendable {
-    public let status: String
-    public let message: String
-    public let requestId: String
+    /// Present in non-flush responses (e.g. "ok", "queued").
+    public let status: String?
+    /// Human-readable message from the server.
+    public let message: String?
+    /// Present in flush/async responses (HTTP 202).
+    public let requestId: String?
 
     enum CodingKeys: String, CodingKey {
         case status
