@@ -141,6 +141,10 @@ actor HTTPTransport {
         request.timeoutInterval = config.timeoutInterval
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
+        for (key, value) in config.additionalHeaders {
+            request.setValue(value, forHTTPHeaderField: key)
+        }
+
         if let body {
             request.httpBody = try encoder.encode(AnyEncodable(body))
         }

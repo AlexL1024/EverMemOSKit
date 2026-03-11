@@ -10,6 +10,8 @@ public struct Configuration: Sendable {
     public let maxRetries: Int
     public let retryDelay: TimeInterval
     public let logLevel: LogLevel
+    /// Extra HTTP headers sent with every request (e.g. `["X-Tenant-Id": "my_tenant"]`).
+    public let additionalHeaders: [String: String]
 
     public enum LogLevel: Int, Sendable {
         case none = 0, error, info, debug
@@ -23,7 +25,8 @@ public struct Configuration: Sendable {
         timeoutInterval: TimeInterval = 30,
         maxRetries: Int = 3,
         retryDelay: TimeInterval = 1.0,
-        logLevel: LogLevel = .error
+        logLevel: LogLevel = .error,
+        additionalHeaders: [String: String] = [:]
     ) {
         self.baseURL = baseURL
         self.auth = auth
@@ -33,6 +36,7 @@ public struct Configuration: Sendable {
         self.maxRetries = maxRetries
         self.retryDelay = retryDelay
         self.logLevel = logLevel
+        self.additionalHeaders = additionalHeaders
     }
 
     /// Convenience initializer from a DeploymentProfile.
@@ -43,7 +47,8 @@ public struct Configuration: Sendable {
         timeoutInterval: TimeInterval = 30,
         maxRetries: Int = 3,
         retryDelay: TimeInterval = 1.0,
-        logLevel: LogLevel = .error
+        logLevel: LogLevel = .error,
+        additionalHeaders: [String: String] = [:]
     ) {
         self.init(
             baseURL: baseURL ?? profile.defaultBaseURL,
@@ -53,7 +58,8 @@ public struct Configuration: Sendable {
             timeoutInterval: timeoutInterval,
             maxRetries: maxRetries,
             retryDelay: retryDelay,
-            logLevel: logLevel
+            logLevel: logLevel,
+            additionalHeaders: additionalHeaders
         )
     }
 }
