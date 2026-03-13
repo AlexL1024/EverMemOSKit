@@ -2,7 +2,12 @@
 
 EverMemOSKit is a Swift SDK for integrating EverMemOS memory into iOS and macOS apps.
 
-## 1. Project
+### Video
+English demo video:
+
+https://youtu.be/Fw8IoKXWvgY
+
+## The Project
 
 ### What this project is
 
@@ -52,18 +57,6 @@ This can help with:
 - remembering user preferences
 - recalling prior interactions
 - producing more useful and personalized responses
-
-## 2. Video
-
-English demo video:
-
-https://youtu.be/Fw8IoKXWvgY
-
-The video covers:
-
-- the main features of EverMemOSKit
-- how memory is used through the SDK
-- how persistent memory helps end users
 
 ## Installation
 
