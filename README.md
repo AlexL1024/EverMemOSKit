@@ -57,21 +57,13 @@ This can help with:
 
 English demo video:
 
-[LINK TO BE ADDED]
+https://github.com/AlexL1024/EverMemOSKit
 
 The video covers:
 
 - the main features of EverMemOSKit
 - how memory is used through the SDK
 - how persistent memory helps end users
-
-## 3. Deployed URL
-
-Project page / deployed URL:
-
-[LINK TO BE ADDED]
-
-This URL lets visitors view a public overview of the project.
 
 ## Installation
 
