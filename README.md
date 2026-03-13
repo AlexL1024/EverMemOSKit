@@ -57,7 +57,7 @@ This can help with:
 
 English demo video:
 
-https://www.youtube.com/watch?v=7_5noX1WZKI
+https://youtu.be/rCNKtV9pTsY
 
 The video covers:
 
