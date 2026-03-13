@@ -57,7 +57,7 @@ This can help with:
 
 English demo video:
 
-https://github.com/AlexL1024/EverMemOSKit
+https://www.youtube.com/watch?v=7_5noX1WZKI
 
 The video covers:
 
