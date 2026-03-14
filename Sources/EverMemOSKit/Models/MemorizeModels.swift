@@ -5,7 +5,7 @@ import Foundation
 public struct MemorizeRequest: Encodable, Sendable {
     public let messageId: String
     public let createTime: String
-    public let sender: String
+    public var sender: String
     public let content: String
     public var groupId: String?
     public var groupName: String?

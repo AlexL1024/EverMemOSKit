@@ -12,6 +12,8 @@ public struct Configuration: Sendable {
     public let logLevel: LogLevel
     /// Extra HTTP headers sent with every request (e.g. `["X-Tenant-Id": "my_tenant"]`).
     public let additionalHeaders: [String: String]
+    /// Optional device identifier to isolate data per device.
+    public let deviceId: String?
 
     public enum LogLevel: Int, Sendable {
         case none = 0, error, info, debug
@@ -26,7 +28,8 @@ public struct Configuration: Sendable {
         maxRetries: Int = 3,
         retryDelay: TimeInterval = 1.0,
         logLevel: LogLevel = .error,
-        additionalHeaders: [String: String] = [:]
+        additionalHeaders: [String: String] = [:],
+        deviceId: String? = nil
     ) {
         self.baseURL = baseURL
         self.auth = auth
@@ -37,6 +40,7 @@ public struct Configuration: Sendable {
         self.retryDelay = retryDelay
         self.logLevel = logLevel
         self.additionalHeaders = additionalHeaders
+        self.deviceId = deviceId
     }
 
     /// Convenience initializer from a DeploymentProfile.
@@ -48,7 +52,8 @@ public struct Configuration: Sendable {
         maxRetries: Int = 3,
         retryDelay: TimeInterval = 1.0,
         logLevel: LogLevel = .error,
-        additionalHeaders: [String: String] = [:]
+        additionalHeaders: [String: String] = [:],
+        deviceId: String? = nil
     ) {
         self.init(
             baseURL: baseURL ?? profile.defaultBaseURL,
@@ -59,7 +64,8 @@ public struct Configuration: Sendable {
             maxRetries: maxRetries,
             retryDelay: retryDelay,
             logLevel: logLevel,
-            additionalHeaders: additionalHeaders
+            additionalHeaders: additionalHeaders,
+            deviceId: deviceId
         )
     }
 }

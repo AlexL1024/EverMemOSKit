@@ -5,11 +5,13 @@ public actor EverMemOSClient {
     private let transport: HTTPTransport
     private let v: String
     private let statusPath: String
+    private let deviceId: String?
 
     public init(config: Configuration) {
         self.transport = HTTPTransport(config: config)
         self.v = config.apiVersion
         self.statusPath = config.statusPathSegment
+        self.deviceId = config.deviceId
     }
 
     /// Convenience: create a client with bearer token auth.
@@ -34,6 +36,7 @@ public actor EverMemOSClient {
         self.transport = HTTPTransport(config: config)
         self.v = config.apiVersion
         self.statusPath = config.statusPathSegment
+        self.deviceId = config.deviceId
     }
 
     /// For testing: inject a custom URLSession.
@@ -41,13 +44,19 @@ public actor EverMemOSClient {
         self.transport = HTTPTransport(config: config, session: session)
         self.v = config.apiVersion
         self.statusPath = config.statusPathSegment
+        self.deviceId = config.deviceId
     }
 
     // MARK: - Memories
 
     public func memorize(_ request: MemorizeRequest) async throws -> AddMemoriesResponse {
-        try await transport.requestBare(
-            method: "POST", path: "api/\(v)/memories", body: request
+        var augmentedRequest = request
+        augmentedRequest.sender = DeviceIDHelper.augment(userId: request.sender, with: deviceId)
+        if let groupId = request.groupId {
+            augmentedRequest.groupId = DeviceIDHelper.augment(groupId: groupId, with: deviceId)
+        }
+        return try await transport.requestBare(
+            method: "POST", path: "api/\(v)/memories", body: augmentedRequest
         )
     }
 
