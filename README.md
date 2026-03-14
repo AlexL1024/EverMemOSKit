@@ -20,6 +20,7 @@ EverMemOSKit is a standalone Swift Package Manager SDK that provides a typed cli
 - Bearer token and HMAC authentication
 - Memory write, fetch, search, delete, and redact support
 - SSE chat streaming support
+- Device ID support for multi-device data isolation
 - Typed request and response models
 - Automated tests for core API behavior
 
@@ -66,3 +67,4 @@ Add the package in `Package.swift`:
 dependencies: [
     .package(url: "https://github.com/AlexL1024/EverMemOSKit.git", from: "0.1.0")
 ]
+```
